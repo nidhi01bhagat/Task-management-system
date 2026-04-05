@@ -2,6 +2,9 @@ import { Response } from "express"
 import prisma from "../utils/prisma"
 import { AuthRequest } from "../middleware/auth"
 
+const getSingleParam = (value: string | string[]) =>
+  Array.isArray(value) ? value[0] : value
+
 export const getTasks = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!
@@ -50,7 +53,7 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
 export const getTask = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!
-    const { id } = req.params
+    const id = getSingleParam(req.params.id)
 
     const task = await prisma.task.findFirst({
       where: { id: parseInt(id), userId },
@@ -93,7 +96,7 @@ export const createTask = async (req: AuthRequest, res: Response) => {
 export const updateTask = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!
-    const { id } = req.params
+    const id = getSingleParam(req.params.id)
     const { title, description, status } = req.body
 
     const existingTask = await prisma.task.findFirst({
@@ -122,7 +125,7 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
 export const deleteTask = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!
-    const { id } = req.params
+    const id = getSingleParam(req.params.id)
 
     const existingTask = await prisma.task.findFirst({
       where: { id: parseInt(id), userId },
@@ -143,7 +146,7 @@ export const deleteTask = async (req: AuthRequest, res: Response) => {
 export const toggleTask = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!
-    const { id } = req.params
+    const id = getSingleParam(req.params.id)
 
     const existingTask = await prisma.task.findFirst({
       where: { id: parseInt(id), userId },
