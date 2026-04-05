@@ -169,8 +169,4 @@ Frontend runs on `http://localhost:3000`
 - GitHub: [@nidhi01bhagat](https://github.com/nidhi01bhagat)
 - Email: nidhi01bhagat@gmail.com
 
-## 📄 License
-
-This project is built as part of the Associate Software Developer assessment at Earnest Data Analytics.
-
 
