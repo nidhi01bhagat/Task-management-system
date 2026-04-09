@@ -4,8 +4,7 @@ TaskFlow is a full-stack web application where users can register, log in, and m
 their personal tasks. It is built with a Node.js backend and a Next.js frontend,
 connected through a REST API secured with JWT authentication.
 
-This project was built as part of the Associate Software Developer assessment
-at Earnest Data Analytics.
+
 
 ---
 
