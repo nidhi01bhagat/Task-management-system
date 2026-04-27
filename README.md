@@ -1,252 +1,156 @@
-# TaskFlow — Task Management System
+#  TaskFlow - Task Management System
+> A full-stack task management system designed with production-level architecture, secure authentication, and scalable API design using Node.js, Next.js, and TypeScript.
 
-TaskFlow is a full-stack web application where users can register, log in, and manage
-their personal tasks. It is built with a Node.js backend and a Next.js frontend,
-connected through a REST API secured with JWT authentication.
+## Overview
+TaskFlow is a full-stack web application that enables users to securely manage personal tasks with a clean and responsive interface. The system is built with a strong focus on backend architecture, authentication flows, and maintainable code structure—mirroring real-world production applications.
 
+Users can register, log in, and manage tasks through a protected dashboard, with seamless session handling powered by JWT-based authentication.
 
+## Key Capabilities
 
----
-
-## What This Application Does
-
-A user visits the app, creates an account, and lands on their personal dashboard.
-From there they can create tasks, mark them complete, edit details, delete them,
-search by title, and filter by status. Every user sees only their own tasks.
-Sessions are handled automatically — the app refreshes login tokens in the
-background so users are never interrupted mid-session.
+* Secure user authentication (JWT access + refresh token flow)
+* Full CRUD operations for task management
+* Search, filter, and pagination support
+* Automatic session refresh using Axios interceptors
+* User-specific data isolation (multi-user safe architecture)
 
 ---
 
-## Tech Stack
+##  System Architecture
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| Backend | Node.js, Express, TypeScript | REST API server |
-| Database | SQLite | File-based relational database |
-| ORM | Prisma | Database queries and migrations |
-| Authentication | JWT (Access + Refresh Tokens) | Stateless session management |
-| Password Security | bcrypt | One-way password hashing |
-| Frontend | Next.js 16, TypeScript | React-based web application |
-| Styling | Tailwind CSS | Utility-based CSS framework |
-| HTTP Client | Axios | API communication with interceptors |
-| Dev Runner | Concurrently | Runs both servers with one command |
+```text
+Client (Next.js)
+        ↓
+REST API (Node.js + Express)
+        ↓
+Database (SQLite via Prisma ORM)
+```
+
+* Frontend handles UI and API communication
+* Backend enforces business logic and authentication
+* Database layer ensures data consistency and integrity
 
 ---
 
-## Project Structure
+##  Authentication Design
+
+The system uses a **dual-token strategy**:
+
+* **Access Token (short-lived)** → sent with every request
+* **Refresh Token (long-lived)** → used to renew sessions
+
+An Axios interceptor automatically:
+
+1. Detects expired tokens
+2. Requests a new access token
+3. Retries the failed request
+
+This ensures **zero interruption for the user experience**, similar to production systems.
+
+---
+
+##  Tech Stack
+
+| Layer      | Technology                    |
+| ---------- | ----------------------------- |
+| Backend    | Node.js, Express, TypeScript  |
+| Database   | SQLite                        |
+| ORM        | Prisma                        |
+| Auth       | JWT (Access + Refresh Tokens) |
+| Security   | bcrypt                        |
+| Frontend   | Next.js, TypeScript           |
+| Styling    | Tailwind CSS                  |
+| API Client | Axios (with interceptors)     |
+
+---
+
+##  Project Structure
+
+```bash
 task-management-system/
-│
-├── package.json                     # Root config — starts both servers together
-│
-├── backend/                         # Node.js API server
-│   ├── prisma/
-│   │   ├── schema.prisma            # Defines User and Task database tables
-│   │   └── migrations/              # Tracks database changes over time
-│   ├── src/
-│   │   ├── controllers/
-│   │   │   ├── authController.ts    # Handles register, login, refresh, logout
-│   │   │   └── taskController.ts    # Handles create, read, update, delete, toggle
-│   │   ├── middleware/
-│   │   │   └── auth.ts              # Verifies JWT token on protected routes
-│   │   ├── routes/
-│   │   │   ├── authRoutes.ts        # Maps /auth/* endpoints to controllers
-│   │   │   └── taskRoutes.ts        # Maps /tasks/* endpoints to controllers
-│   │   ├── utils/
-│   │   │   ├── jwt.ts               # Generates and verifies JWT tokens
-│   │   │   └── prisma.ts            # Shared Prisma database client
-│   │   └── index.ts                 # Entry point — starts the Express server
-│   ├── .env                         # Environment variables (not committed to Git)
-│   └── package.json
-│
-├── frontend/                        # Next.js web application
-│   ├── app/
-│   │   ├── login/page.tsx           # Login screen
-│   │   ├── register/page.tsx        # Registration screen
-│   │   ├── dashboard/page.tsx       # Main task management screen
-│   │   ├── layout.tsx               # Shared HTML wrapper
-│   │   └── page.tsx                 # Root redirect based on auth state
-│   ├── lib/
-│   │   └── api.ts                   # Axios instance with token refresh logic
-│   └── package.json
-│
-└── README.md
+├── backend/        # API server (auth, tasks, middleware)
+├── frontend/       # Next.js application
+├── package.json    # Runs both services together
+```
 
 ---
 
-## Authentication Flow
+##  Engineering Approach
 
-When a user logs in, the server returns two tokens — an access token and a
-refresh token. The access token is short-lived (15 minutes) and is sent with
-every API request. The refresh token is long-lived (7 days) and is used only
-to obtain a new access token when the current one expires.
+This project was implemented from scratch with a focus on:
 
-This happens automatically in the background. The Axios interceptor in
-frontend/lib/api.ts catches any 401 response, calls the refresh endpoint,
-updates the stored tokens, and retries the original request — all without
-the user noticing.
+* Separation of concerns (controllers, routes, middleware)
+* Clean and maintainable code structure
+* Scalable authentication design
+* Real-world API behavior (pagination, filtering, error handling)
 
-On logout, the refresh token is deleted from the database, which permanently
-invalidates that session.
-Login
--> Server returns accessToken (15 min) + refreshToken (7 days)
--> accessToken stored in localStorage, sent in Authorization header
--> On 401 response: interceptor calls /auth/refresh
--> New tokens saved, original request retried
--> On logout: refreshToken deleted from database
+The goal was not just to build features, but to understand how production systems are designed and maintained.
 
 ---
 
-## API Reference
+##  API Highlights
 
-### Authentication
+### Auth
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | /auth/register | Create a new user account |
-| POST | /auth/login | Log in and receive tokens |
-| POST | /auth/refresh | Exchange refresh token for new access token |
-| POST | /auth/logout | Invalidate session |
+* `POST /auth/register`
+* `POST /auth/login`
+* `POST /auth/refresh`
+* `POST /auth/logout`
 
-### Tasks (require Authorization header)
+### Tasks
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | /tasks | List tasks with pagination, search, filter |
-| POST | /tasks | Create a new task |
-| GET | /tasks/:id | Get a single task |
-| PATCH | /tasks/:id | Update task fields |
-| DELETE | /tasks/:id | Delete a task |
-| PATCH | /tasks/:id/toggle | Toggle status between pending and completed |
-
-### Query Parameters for GET /tasks
-
-| Parameter | Description | Example |
-|-----------|-------------|---------|
-| page | Page number | ?page=1 |
-| limit | Results per page | ?limit=10 |
-| status | Filter by status | ?status=pending |
-| search | Search by title | ?search=meeting |
+* `GET /tasks` (with pagination, search, filters)
+* `POST /tasks`
+* `PATCH /tasks/:id`
+* `DELETE /tasks/:id`
+* `PATCH /tasks/:id/toggle`
 
 ---
 
-## Database Schema
-User
-id            Int       Primary key
-name          String
-email         String    Unique
-password      String    Hashed with bcrypt
-refreshToken  String    Nullable, cleared on logout
-createdAt     DateTime
-tasks         Task[]    One user has many tasks
-Task
-id            Int       Primary key
-title         String
-description   String    Optional
-status        String    Default: pending
-createdAt     DateTime
-updatedAt     DateTime  Auto-updated
-userId        Int       Foreign key to User
+##  Data Model
+
+* **User → Task (1:N relationship)**
+* Secure password storage using hashing
+* Token-based session tracking
 
 ---
 
-## How to Run Locally
+##  Challenges Solved
 
-### Requirements
+* Designing a reliable token refresh mechanism
+* Maintaining clean separation between layers
+* Handling authenticated requests without breaking UX
+* Structuring backend for scalability
 
-- Node.js v18 or above
-- npm v9 or above
-- Git
+---
 
-### Setup
+##  Outcome
 
-Clone the repository:
+Built a complete, end-to-end system demonstrating:
+
+* Backend architecture understanding
+* Secure authentication implementation
+* Full-stack integration
+* Production-level thinking
+
+---
+
+##  Running Locally
 
 ```bash
 git clone https://github.com/nidhi01bhagat/task-management-system.git
 cd task-management-system
-```
-
-Install backend dependencies:
-
-```bash
-cd backend
 npm install
-```
-
-Create a .env file inside the backend folder:
-
-```env
-DATABASE_URL="file:./dev.db"
-JWT_ACCESS_SECRET="super_secret_access_key_2024"
-JWT_REFRESH_SECRET="super_secret_refresh_key_2024"
-PORT=5000
-```
-
-Run the database migration:
-
-```bash
-npx prisma migrate dev --name init
-```
-
-Install frontend dependencies:
-
-```bash
-cd ../frontend
-npm install
-```
-
-Install root dependencies:
-
-```bash
-cd ..
-npm install
-```
-
-Start both servers with a single command:
-
-```bash
 npm run dev
 ```
 
-The backend starts on http://localhost:5000 and the frontend on
-http://localhost:3000. Open http://localhost:3000 in your browser.
-
 ---
 
-## How the Single Command Works
-
-The root package.json uses concurrently to run both servers in parallel
-from one terminal:
-
-```json
-"dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
-```
-
-The --prefix flag tells npm which subdirectory to run the command in.
-Without this, you would need two separate terminals.
-
----
-
-## About package-lock.json
-
-Each folder — backend, frontend, and root — has its own package-lock.json.
-This file records the exact version of every installed dependency so that
-anyone who clones this repository and runs npm install gets identical
-packages, regardless of when they do it.
-
-The node_modules folder is excluded from Git. The lock file is what allows
-it to be reliably recreated.
-
----
-
-## Developer
+##  Developer
 
 Nidhi Bhagat
 GitHub: github.com/nidhi01bhagat
 LinkedIn: linkedin.com/in/nidhi-bhagat01
-Email: nidhi01bhagat@gmail.com
 
 ---
 
-## License
